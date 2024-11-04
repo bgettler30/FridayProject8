@@ -1,7 +1,7 @@
 import sqlite3
 import tkinter as tk
 from tkinter import messagebox
-
+from tkinter import simpledialog
 
 def setup_database():
     conn = sqlite3.connect('feedback.db')
@@ -16,9 +16,9 @@ def setup_database():
     ''')
     conn.commit()
     conn.close()
-if __name__ == "__main__":
-    setup_database
 
+if __name__ == "__main__":
+    setup_database()
 
 def submit_feedback():
     name = entry_name.get()
@@ -38,6 +38,28 @@ def submit_feedback():
     else:
         messagebox.showwarning("Input Error", "Please fill out all fields.")
 
+RETRIEVE_PASSWORD = "password" 
+
+def retrieve_feedback():
+    
+    password = simpledialog.askstring("Password", "Enter password to retrieve data:", show="*")
+
+    if password == RETRIEVE_PASSWORD:
+        conn = sqlite3.connect('feedback.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM feedback")
+        records = cursor.fetchall()
+        conn.close()
+
+        feedback_text = "All Feedback Entries:\n\n" + "\n".join(
+            f"ID: {record[0]}, Name: {record[1]}, Email: {record[2]}, Feedback: {record[3]}"
+            for record in records
+        )
+        messagebox.showinfo("Feedback Data", feedback_text)
+    else:
+        messagebox.showerror("Access Denied", "Incorrect password.")
+
+
 root = tk.Tk()
 root.title("Customer Feedback")
 
@@ -56,4 +78,11 @@ entry_feedback.grid(row=2, column=1, padx=10, pady=5)
 submit_button = tk.Button(root, text="Submit", command=submit_feedback)
 submit_button.grid(row=3, column=1, pady=10)
 
+retrieve_button = tk.Button(root, text="Retrieve Data", command=retrieve_feedback)
+retrieve_button.grid(row=4, column=1, pady=10)
+
 root.mainloop()
+
+
+
+
